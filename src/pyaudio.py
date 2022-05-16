@@ -108,10 +108,9 @@ from __future__ import annotations
 
 # attempt to import PortAudio
 try:
-    import _portaudio as pa
-except ImportError:
-    print("Could not import the PyAudio C module '_portaudio'.")
-    raise
+    import _portaudio as pa  # type: ignore[import]
+except ImportError as e:
+    raise ImportError("Could not import the PyAudio C module '_portaudio'.") from e
 
 ############################################################
 # GLOBALS

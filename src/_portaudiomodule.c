@@ -24,10 +24,12 @@
  * SOFTWARE.
  */
 
+#include "_portaudiomodule.h"
+
 #include <stdio.h>
+
 #include "Python.h"
 #include "portaudio.h"
-#include "_portaudiomodule.h"
 
 #ifdef MACOSX
 #include "pa_mac_core.h"
@@ -754,8 +756,8 @@ typedef struct {
 typedef struct {
   // clang-format off
   PyObject_HEAD
-  // clang-format on
-  PaStream *stream;
+      // clang-format on
+      PaStream *stream;
   PaStreamParameters *inputParameters;
   PaStreamParameters *outputParameters;
   PaStreamInfo *streamInfo;
@@ -771,8 +773,8 @@ static void _cleanup_Stream_object(_pyAudio_Stream *streamObject) {
     Py_BEGIN_ALLOW_THREADS
     Pa_CloseStream(streamObject->stream);
     Py_END_ALLOW_THREADS
-    // clang-format on
-    streamObject->stream = NULL;
+        // clang-format on
+        streamObject->stream = NULL;
   }
 
   if (streamObject->streamInfo) streamObject->streamInfo = NULL;
@@ -980,9 +982,9 @@ static PyObject *pa_initialize(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   err = Pa_Initialize();
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if (err != paNoError) {
+      if (err != paNoError) {
     // clang-format off
     Py_BEGIN_ALLOW_THREADS
     Pa_Terminate();
@@ -990,7 +992,7 @@ static PyObject *pa_initialize(PyObject *self, PyObject *args) {
     // clang-format on
 
 #ifdef VERBOSE
-    fprintf(stderr, "An error occured while using the portaudio stream\n");
+        fprintf(stderr, "An error occured while using the portaudio stream\n");
     fprintf(stderr, "Error number: %d\n", err);
     fprintf(stderr, "Error message: %s\n", Pa_GetErrorText(err));
 #endif
@@ -1009,9 +1011,9 @@ static PyObject *pa_terminate(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   Pa_Terminate();
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  Py_INCREF(Py_None);
+      Py_INCREF(Py_None);
   return Py_None;
 }
 
@@ -1618,9 +1620,9 @@ static PyObject *pa_open(PyObject *self, PyObject *args, PyObject *kwargs) {
                       /* callback userData, if applicable */
                       context);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if (err != paNoError) {
+      if (err != paNoError) {
 #ifdef VERBOSE
     fprintf(stderr, "An error occured while using the portaudio stream\n");
     fprintf(stderr, "Error number: %d\n", err);
@@ -1782,10 +1784,9 @@ static PyObject *pa_start_stream(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   err = Pa_StartStream(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if ((err != paNoError) &&
-      (err != paStreamIsNotStopped)) {
+      if ((err != paNoError) && (err != paStreamIsNotStopped)) {
     _cleanup_Stream_object(streamObject);
 
 #ifdef VERBOSE
@@ -1823,9 +1824,9 @@ static PyObject *pa_stop_stream(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   err = Pa_StopStream(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if ((err != paNoError) && (err != paStreamIsStopped)) {
+      if ((err != paNoError) && (err != paStreamIsStopped)) {
     _cleanup_Stream_object(streamObject);
 
 #ifdef VERBOSE
@@ -1863,9 +1864,9 @@ static PyObject *pa_abort_stream(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   err = Pa_AbortStream(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if ((err != paNoError) && (err != paStreamIsStopped)) {
+      if ((err != paNoError) && (err != paStreamIsStopped)) {
     _cleanup_Stream_object(streamObject);
 
 #ifdef VERBOSE
@@ -1904,9 +1905,9 @@ static PyObject *pa_is_stream_stopped(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   err = Pa_IsStreamStopped(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if (err < 0) {
+      if (err < 0) {
     _cleanup_Stream_object(streamObject);
 
 #ifdef VERBOSE
@@ -1949,9 +1950,9 @@ static PyObject *pa_is_stream_active(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   err = Pa_IsStreamActive(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if (err < 0) {
+      if (err < 0) {
     _cleanup_Stream_object(streamObject);
 
 #ifdef VERBOSE
@@ -1995,9 +1996,9 @@ static PyObject *pa_get_stream_time(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   time = Pa_GetStreamTime(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if (time == 0) {
+      if (time == 0) {
     _cleanup_Stream_object(streamObject);
     PyErr_SetObject(PyExc_IOError,
                     Py_BuildValue("(i,s)", paInternalError, "Internal Error"));
@@ -2028,9 +2029,9 @@ static PyObject *pa_get_stream_cpu_load(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   cpuload = Pa_GetStreamCpuLoad(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  return PyFloat_FromDouble(cpuload);
+      return PyFloat_FromDouble(cpuload);
 }
 
 /*************************************************************
@@ -2076,9 +2077,9 @@ static PyObject *pa_write_stream(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   err = Pa_WriteStream(streamObject->stream, data, total_frames);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if (err != paNoError) {
+      if (err != paNoError) {
     if (err == paOutputUnderflowed) {
       if (should_throw_exception) {
         goto error;
@@ -2160,9 +2161,9 @@ static PyObject *pa_read_stream(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   err = Pa_ReadStream(streamObject->stream, sampleBlock, total_frames);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  if (err != paNoError) {
+      if (err != paNoError) {
     if (err == paInputOverflowed) {
       if (should_raise_exception) {
         goto error;
@@ -2210,9 +2211,9 @@ static PyObject *pa_get_stream_write_available(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   frames = Pa_GetStreamWriteAvailable(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  return PyLong_FromLong(frames);
+      return PyLong_FromLong(frames);
 }
 
 static PyObject *pa_get_stream_read_available(PyObject *self, PyObject *args) {
@@ -2236,9 +2237,9 @@ static PyObject *pa_get_stream_read_available(PyObject *self, PyObject *args) {
   Py_BEGIN_ALLOW_THREADS
   frames = Pa_GetStreamReadAvailable(streamObject->stream);
   Py_END_ALLOW_THREADS
-  // clang-format on
+      // clang-format on
 
-  return PyLong_FromLong(frames);
+      return PyLong_FromLong(frames);
 }
 
 /************************************************************

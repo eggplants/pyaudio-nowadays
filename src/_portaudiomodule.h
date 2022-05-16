@@ -30,98 +30,72 @@
 #define __PAMODULE_H__
 
 /* version */
-static PyObject *
-pa_get_version(PyObject *self, PyObject *args);
+static PyObject *pa_get_version(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_version_text(PyObject *self, PyObject *args);
+static PyObject *pa_get_version_text(PyObject *self, PyObject *args);
 
 /* framework init */
-static PyObject *
-pa_initialize(PyObject *self, PyObject *args);
+static PyObject *pa_initialize(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_terminate(PyObject *self, PyObject *args);
+static PyObject *pa_terminate(PyObject *self, PyObject *args);
 
 /* host api */
-static PyObject *
-pa_get_host_api_count(PyObject *self, PyObject *args);
+static PyObject *pa_get_host_api_count(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_default_host_api(PyObject *self, PyObject *args);
+static PyObject *pa_get_default_host_api(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_host_api_type_id_to_host_api_index(PyObject *self, PyObject *args);
+static PyObject *pa_host_api_type_id_to_host_api_index(PyObject *self,
+                                                       PyObject *args);
 
-static PyObject *
-pa_host_api_device_index_to_device_index(PyObject *self, PyObject *args);
+static PyObject *pa_host_api_device_index_to_device_index(PyObject *self,
+                                                          PyObject *args);
 
-static PyObject *
-pa_get_host_api_info(PyObject *self, PyObject *args);
+static PyObject *pa_get_host_api_info(PyObject *self, PyObject *args);
 
 /* device api */
-static PyObject *
-pa_get_device_count(PyObject *self, PyObject *args);
+static PyObject *pa_get_device_count(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_default_input_device(PyObject *self, PyObject *args);
+static PyObject *pa_get_default_input_device(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_default_output_device(PyObject *self, PyObject *args);
+static PyObject *pa_get_default_output_device(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_device_info(PyObject *self, PyObject *args);
+static PyObject *pa_get_device_info(PyObject *self, PyObject *args);
 
 /* stream open/close */
 
-static PyObject *
-pa_open(PyObject *self, PyObject *args, PyObject *kwargs);
+static PyObject *pa_open(PyObject *self, PyObject *args, PyObject *kwargs);
 
-static PyObject *
-pa_close(PyObject *self, PyObject *args);
+static PyObject *pa_close(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_sample_size(PyObject *self, PyObject *args);
+static PyObject *pa_get_sample_size(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_is_format_supported(PyObject *self, PyObject *args,
-		       PyObject *kwargs);
+static PyObject *pa_is_format_supported(PyObject *self, PyObject *args,
+                                        PyObject *kwargs);
 
 /* stream start/stop/info */
 
-static PyObject *
-pa_start_stream(PyObject *self, PyObject *args);
+static PyObject *pa_start_stream(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_stop_stream(PyObject *self, PyObject *args);
+static PyObject *pa_stop_stream(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_abort_stream(PyObject *self, PyObject *args);
+static PyObject *pa_abort_stream(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_is_stream_stopped(PyObject *self, PyObject *args);
+static PyObject *pa_is_stream_stopped(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_is_stream_active(PyObject *self, PyObject *args);
+static PyObject *pa_is_stream_active(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_stream_time(PyObject *self, PyObject *args);
+static PyObject *pa_get_stream_time(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_stream_cpu_load(PyObject *self, PyObject *args);
+static PyObject *pa_get_stream_cpu_load(PyObject *self, PyObject *args);
 
 /* stream write/read */
 
-static PyObject *
-pa_write_stream(PyObject *self, PyObject *args);
+static PyObject *pa_write_stream(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_read_stream(PyObject *self, PyObject *args);
+static PyObject *pa_read_stream(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_stream_write_available(PyObject *self, PyObject *args);
+static PyObject *pa_get_stream_write_available(PyObject *self, PyObject *args);
 
-static PyObject *
-pa_get_stream_read_available(PyObject *self, PyObject *args);
+static PyObject *pa_get_stream_read_available(PyObject *self, PyObject *args);
 
 #endif
