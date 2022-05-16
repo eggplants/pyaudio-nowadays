@@ -14,38 +14,40 @@ device.
 
 import math
 import struct
+import sys
 import time
 import unittest
 import wave
-import sys
 
 import numpy
 
 import pyaudio
 
-DUMP_CAPTURE=False
+DUMP_CAPTURE = False
+
 
 class PyAudioTests(unittest.TestCase):
     def setUp(self):
         self.p = pyaudio.PyAudio()
-        (self.loopback_input_idx,
-         self.loopback_output_idx) = self.get_audio_loopback()
-        assert (self.loopback_input_idx is None
-                or self.loopback_input_idx >= 0), "No loopback device found"
-        assert (self.loopback_output_idx is None
-                or self.loopback_output_idx >= 0), "No loopback device found"
+        (self.loopback_input_idx, self.loopback_output_idx) = self.get_audio_loopback()
+        assert (
+            self.loopback_input_idx is None or self.loopback_input_idx >= 0
+        ), "No loopback device found"
+        assert (
+            self.loopback_output_idx is None or self.loopback_output_idx >= 0
+        ), "No loopback device found"
 
     def tearDown(self):
         self.p.terminate()
 
     def get_audio_loopback(self):
-        if sys.platform == 'darwin':
+        if sys.platform == "darwin":
+            return self._find_audio_loopback("Soundflower (2ch)", "Soundflower (2ch)")
+        if sys.platform in ("linux", "linux2"):
             return self._find_audio_loopback(
-                'Soundflower (2ch)', 'Soundflower (2ch)')
-        if sys.platform in ('linux', 'linux2'):
-            return self._find_audio_loopback(
-                'Loopback: PCM (hw:1,0)', 'Loopback: PCM (hw:1,1)')
-        if sys.platform == 'win32':
+                "Loopback: PCM (hw:1,0)", "Loopback: PCM (hw:1,1)"
+            )
+        if sys.platform == "win32":
             # Assumes running in a VM, in which the hypervisor can
             # set up a loopback device to back the "default" audio devices.
             # Here, None indicates default device.
@@ -58,12 +60,13 @@ class PyAudioTests(unittest.TestCase):
         input_idx, output_idx = -1, -1
         for device_idx in range(self.p.get_device_count()):
             devinfo = self.p.get_device_info_by_index(device_idx)
-            if (outdev == devinfo.get('name') and
-                devinfo.get('maxOutputChannels', 0) > 0):
+            if (
+                outdev == devinfo.get("name")
+                and devinfo.get("maxOutputChannels", 0) > 0
+            ):
                 output_idx = device_idx
 
-            if (indev == devinfo.get('name') and
-                devinfo.get('maxInputChannels', 0) > 0):
+            if indev == devinfo.get("name") and devinfo.get("maxInputChannels", 0) > 0:
                 input_idx = device_idx
 
             if output_idx > -1 and input_idx > -1:
@@ -80,18 +83,17 @@ class PyAudioTests(unittest.TestCase):
 
     def test_input_output_blocking(self):
         """Test blocking-based record and playback."""
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
         # Blocking-mode might add some initial choppiness on some
         # platforms/loopback devices, so set a longer duration.
-        duration = 3 # seconds
+        duration = 3  # seconds
         frames_per_chunk = 1024
 
         freqs = [130.81, 329.63, 440.0, 466.16, 587.33, 739.99]
         test_signal = self.create_reference_signal(freqs, rate, width, duration)
-        audio_chunks = self.signal_to_chunks(
-            test_signal, frames_per_chunk, channels)
+        audio_chunks = self.signal_to_chunks(test_signal, frames_per_chunk, channels)
 
         out_stream = self.p.open(
             format=self.p.get_format_from_width(width),
@@ -99,14 +101,16 @@ class PyAudioTests(unittest.TestCase):
             rate=rate,
             output=True,
             frames_per_buffer=frames_per_chunk,
-            output_device_index=self.loopback_output_idx)
+            output_device_index=self.loopback_output_idx,
+        )
         in_stream = self.p.open(
             format=self.p.get_format_from_width(width),
             channels=channels,
             rate=rate,
             input=True,
             frames_per_buffer=frames_per_chunk,
-            input_device_index=self.loopback_input_idx)
+            input_device_index=self.loopback_input_idx,
+        )
 
         captured = []
         for chunk in audio_chunks:
@@ -120,46 +124,44 @@ class PyAudioTests(unittest.TestCase):
         out_stream.stop_stream()
 
         if DUMP_CAPTURE:
-            self.write_wav('test_blocking.wav', b''.join(captured),
-                           width, channels, rate)
+            self.write_wav(
+                "test_blocking.wav", b"".join(captured), width, channels, rate
+            )
 
-        captured_signal = self.pcm16_to_numpy(b''.join(captured))
+        captured_signal = self.pcm16_to_numpy(b"".join(captured))
         captured_left_channel = captured_signal[::2]
         captured_right_channel = captured_signal[1::2]
 
         self.assert_pcm16_spectrum_nearly_equal(
-            rate,
-            captured_left_channel,
-            test_signal,
-            len(freqs))
+            rate, captured_left_channel, test_signal, len(freqs)
+        )
         self.assert_pcm16_spectrum_nearly_equal(
-            rate,
-            captured_right_channel,
-            test_signal,
-            len(freqs))
+            rate, captured_right_channel, test_signal, len(freqs)
+        )
 
     def test_input_output_callback(self):
         """Test callback-based record and playback."""
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
-        duration = 1 # second
+        duration = 1  # second
         frames_per_chunk = 1024
 
         freqs = [130.81, 329.63, 440.0, 466.16, 587.33, 739.99]
         test_signal = self.create_reference_signal(freqs, rate, width, duration)
-        audio_chunks = self.signal_to_chunks(
-            test_signal, frames_per_chunk, channels)
+        audio_chunks = self.signal_to_chunks(test_signal, frames_per_chunk, channels)
 
-        state = {'count': 0}
+        state = {"count": 0}
+
         def out_callback(_, frame_count, time_info, status):
-            if state['count'] >= len(audio_chunks):
-                return ('', pyaudio.paComplete)
-            rval = (audio_chunks[state['count']], pyaudio.paContinue)
-            state['count'] += 1
+            if state["count"] >= len(audio_chunks):
+                return ("", pyaudio.paComplete)
+            rval = (audio_chunks[state["count"]], pyaudio.paContinue)
+            state["count"] += 1
             return rval
 
         captured = []
+
         def in_callback(in_data, frame_count, time_info, status):
             captured.append(in_data)
             return (None, pyaudio.paContinue)
@@ -171,7 +173,8 @@ class PyAudioTests(unittest.TestCase):
             output=True,
             frames_per_buffer=frames_per_chunk,
             output_device_index=self.loopback_output_idx,
-            stream_callback=out_callback)
+            stream_callback=out_callback,
+        )
 
         in_stream = self.p.open(
             format=self.p.get_format_from_width(width),
@@ -180,7 +183,8 @@ class PyAudioTests(unittest.TestCase):
             input=True,
             frames_per_buffer=frames_per_chunk,
             input_device_index=self.loopback_input_idx,
-            stream_callback=in_callback)
+            stream_callback=in_callback,
+        )
 
         in_stream.start_stream()
         out_stream.start_stream()
@@ -189,23 +193,20 @@ class PyAudioTests(unittest.TestCase):
         out_stream.stop_stream()
 
         if DUMP_CAPTURE:
-            self.write_wav('test_callback.wav', b''.join(captured),
-                           width, channels, rate)
+            self.write_wav(
+                "test_callback.wav", b"".join(captured), width, channels, rate
+            )
 
-        captured_signal = self.pcm16_to_numpy(b''.join(captured))
+        captured_signal = self.pcm16_to_numpy(b"".join(captured))
         captured_left_channel = captured_signal[::2]
         captured_right_channel = captured_signal[1::2]
 
         self.assert_pcm16_spectrum_nearly_equal(
-            rate,
-            captured_left_channel,
-            test_signal,
-            len(freqs))
+            rate, captured_left_channel, test_signal, len(freqs)
+        )
         self.assert_pcm16_spectrum_nearly_equal(
-            rate,
-            captured_right_channel,
-            test_signal,
-            len(freqs))
+            rate, captured_right_channel, test_signal, len(freqs)
+        )
 
     def test_device_lock_gil_order(self):
         """Ensure no deadlock between Pa_{Open,Start,Stop}Stream and GIL."""
@@ -213,13 +214,13 @@ class PyAudioTests(unittest.TestCase):
         # audio device locks. On ALSA and Win32 MME, this problem
         # doesn't seem to appear despite not releasing the GIL when
         # calling into PortAudio.
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
         frames_per_chunk = 1024
 
         def out_callback(_, frame_count, time_info, status):
-            return ('', pyaudio.paComplete)
+            return ("", pyaudio.paComplete)
 
         def in_callback(in_data, frame_count, time_info, status):
             # Release the GIL for a bit
@@ -234,7 +235,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             input_device_index=self.loopback_input_idx,
-            stream_callback=in_callback)
+            stream_callback=in_callback,
+        )
         # In a separate (C) thread, portaudio/driver will grab the device lock,
         # then the GIL to call in_callback.
         in_stream.start_stream()
@@ -255,7 +257,8 @@ class PyAudioTests(unittest.TestCase):
             output=True,
             frames_per_buffer=frames_per_chunk,
             output_device_index=self.loopback_output_idx,
-            stream_callback=out_callback)
+            stream_callback=out_callback,
+        )
         out_stream.start_stream()
 
         time.sleep(0.1)
@@ -264,13 +267,13 @@ class PyAudioTests(unittest.TestCase):
 
     def test_stream_state_gil(self):
         """Ensure no deadlock between Pa_IsStream{Active,Stopped} and GIL."""
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
         frames_per_chunk = 1024
 
         def out_callback(_, frame_count, time_info, status):
-            return ('', pyaudio.paComplete)
+            return ("", pyaudio.paComplete)
 
         def in_callback(in_data, frame_count, time_info, status):
             # Release the GIL for a bit
@@ -285,7 +288,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             input_device_index=self.loopback_input_idx,
-            stream_callback=in_callback)
+            stream_callback=in_callback,
+        )
         out_stream = self.p.open(
             format=self.p.get_format_from_width(width),
             channels=channels,
@@ -294,7 +298,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             output_device_index=self.loopback_output_idx,
-            stream_callback=out_callback)
+            stream_callback=out_callback,
+        )
         # In a separate (C) thread, portaudio/driver will grab the device lock,
         # then the GIL to call in_callback.
         in_stream.start_stream()
@@ -324,13 +329,13 @@ class PyAudioTests(unittest.TestCase):
 
     def test_get_stream_time_gil(self):
         """Ensure no deadlock between PA_GetStreamTime and GIL."""
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
         frames_per_chunk = 1024
 
         def out_callback(_, frame_count, time_info, status):
-            return ('', pyaudio.paComplete)
+            return ("", pyaudio.paComplete)
 
         def in_callback(in_data, frame_count, time_info, status):
             # Release the GIL for a bit
@@ -345,7 +350,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             input_device_index=self.loopback_input_idx,
-            stream_callback=in_callback)
+            stream_callback=in_callback,
+        )
         out_stream = self.p.open(
             format=self.p.get_format_from_width(width),
             channels=channels,
@@ -354,7 +360,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             output_device_index=self.loopback_output_idx,
-            stream_callback=out_callback)
+            stream_callback=out_callback,
+        )
         # In a separate (C) thread, portaudio/driver will grab the device lock,
         # then the GIL to call in_callback.
         in_stream.start_stream()
@@ -378,13 +385,13 @@ class PyAudioTests(unittest.TestCase):
 
     def test_get_stream_cpuload_gil(self):
         """Ensure no deadlock between Pa_GetStreamCpuLoad and GIL."""
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
         frames_per_chunk = 1024
 
         def out_callback(_, frame_count, time_info, status):
-            return ('', pyaudio.paComplete)
+            return ("", pyaudio.paComplete)
 
         def in_callback(in_data, frame_count, time_info, status):
             # Release the GIL for a bit
@@ -399,7 +406,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             input_device_index=self.loopback_input_idx,
-            stream_callback=in_callback)
+            stream_callback=in_callback,
+        )
         out_stream = self.p.open(
             format=self.p.get_format_from_width(width),
             channels=channels,
@@ -408,7 +416,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             output_device_index=self.loopback_output_idx,
-            stream_callback=out_callback)
+            stream_callback=out_callback,
+        )
         # In a separate (C) thread, portaudio/driver will grab the device lock,
         # then the GIL to call in_callback.
         in_stream.start_stream()
@@ -432,8 +441,8 @@ class PyAudioTests(unittest.TestCase):
 
     def test_get_stream_write_available_gil(self):
         """Ensure no deadlock between Pa_GetStreamWriteAvailable and GIL."""
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
         frames_per_chunk = 1024
 
@@ -450,14 +459,16 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             input_device_index=self.loopback_input_idx,
-            stream_callback=in_callback)
+            stream_callback=in_callback,
+        )
         out_stream = self.p.open(
             format=self.p.get_format_from_width(width),
             channels=channels,
             rate=rate,
             output=True,
             frames_per_buffer=frames_per_chunk,
-            output_device_index=self.loopback_output_idx)
+            output_device_index=self.loopback_output_idx,
+        )
         # In a separate (C) thread, portaudio/driver will grab the device lock,
         # then the GIL to call in_callback.
         in_stream.start_stream()
@@ -479,8 +490,8 @@ class PyAudioTests(unittest.TestCase):
 
     def test_get_stream_read_available_gil(self):
         """Ensure no deadlock between Pa_GetStreamReadAvailable and GIL."""
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
         frames_per_chunk = 1024
 
@@ -495,7 +506,8 @@ class PyAudioTests(unittest.TestCase):
             rate=rate,
             input=True,
             frames_per_buffer=frames_per_chunk,
-            input_device_index=self.loopback_input_idx)
+            input_device_index=self.loopback_input_idx,
+        )
         out_stream = self.p.open(
             format=self.p.get_format_from_width(width),
             channels=channels,
@@ -504,7 +516,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             output_device_index=self.loopback_output_idx,
-            stream_callback=out_callback)
+            stream_callback=out_callback,
+        )
         # In a separate (C) thread, portaudio/driver will grab the device lock,
         # then the GIL to call in_callback.
         out_stream.start_stream()
@@ -526,8 +539,8 @@ class PyAudioTests(unittest.TestCase):
 
     def test_terminate_gil(self):
         """Ensure no deadlock between Pa_Terminate and GIL."""
-        rate = 44100 # frames per second
-        width = 2    # bytes per sample
+        rate = 44100  # frames per second
+        width = 2  # bytes per sample
         channels = 2
         frames_per_chunk = 1024
 
@@ -544,7 +557,8 @@ class PyAudioTests(unittest.TestCase):
             start=False,
             frames_per_buffer=frames_per_chunk,
             output_device_index=self.loopback_output_idx,
-            stream_callback=out_callback)
+            stream_callback=out_callback,
+        )
         # In a separate (C) thread, portaudio/driver will grab the device lock,
         # then the GIL to call in_callback.
         out_stream.start_stream()
@@ -566,12 +580,17 @@ class PyAudioTests(unittest.TestCase):
         """Return reference signal with several sinuoids with frequencies
         specified by freqs."""
         total_frames = int(sampling_rate * duration)
-        max_amp = float(2**(width * 8 - 1) - 1)
+        max_amp = float(2 ** (width * 8 - 1) - 1)
         avg_amp = max_amp / len(freqs)
         return [
-            int(sum(avg_amp * math.sin(2*math.pi*freq*(k/float(sampling_rate)))
-                for freq in freqs))
-            for k in range(total_frames)]
+            int(
+                sum(
+                    avg_amp * math.sin(2 * math.pi * freq * (k / float(sampling_rate)))
+                    for freq in freqs
+                )
+            )
+            for k in range(total_frames)
+        ]
 
     @staticmethod
     def signal_to_chunks(frame_data, frames_per_chunk, channels):
@@ -580,29 +599,34 @@ class PyAudioTests(unittest.TestCase):
         frames. Each frame represents a single value from the signal,
         duplicated for each channel specified by channels.
         """
-        frames = [struct.pack('h', x) * channels for x in frame_data]
+        frames = [struct.pack("h", x) * channels for x in frame_data]
         # Chop up frames into chunks
-        return [b''.join(chunk_frames) for chunk_frames in
-                tuple(frames[i:i+frames_per_chunk]
-                      for i in range(0, len(frames), frames_per_chunk))]
+        return [
+            b"".join(chunk_frames)
+            for chunk_frames in tuple(
+                frames[i : i + frames_per_chunk]
+                for i in range(0, len(frames), frames_per_chunk)
+            )
+        ]
 
     @staticmethod
     def pcm16_to_numpy(bytestring):
         """From PCM 16-bit bytes, return an equivalent numpy array of values."""
-        return struct.unpack('%dh' % (len(bytestring) / 2), bytestring)
+        return struct.unpack("%dh" % (len(bytestring) / 2), bytestring)
 
     @staticmethod
     def write_wav(filename, data, width, channels, rate):
         """Write PCM data to wave file."""
-        wf = wave.open(filename, 'wb')
+        wf = wave.open(filename, "wb")
         wf.setnchannels(channels)
         wf.setsampwidth(width)
         wf.setframerate(rate)
         wf.writeframes(data)
         wf.close()
 
-    def assert_pcm16_spectrum_nearly_equal(self, sampling_rate, cap, ref,
-                                           num_freq_peaks_expected):
+    def assert_pcm16_spectrum_nearly_equal(
+        self, sampling_rate, cap, ref, num_freq_peaks_expected
+    ):
         """Compares the discrete fourier transform of a captured signal
         against the reference signal and ensures that the frequency peaks
         match."""
@@ -618,13 +642,18 @@ class PyAudioTests(unittest.TestCase):
         cap_fft = numpy.absolute(numpy.fft.rfft(cap))
         ref_fft = numpy.absolute(numpy.fft.rfft(ref))
         # Find the indices of the peaks:
-        cap_peak_indices = sorted(numpy.argpartition(
-            cap_fft, -num_freq_peaks_expected)[-num_freq_peaks_expected:])
-        ref_peak_indices = sorted(numpy.argpartition(
-            ref_fft, -num_freq_peaks_expected)[-num_freq_peaks_expected:])
+        cap_peak_indices = sorted(
+            numpy.argpartition(cap_fft, -num_freq_peaks_expected)[
+                -num_freq_peaks_expected:
+            ]
+        )
+        ref_peak_indices = sorted(
+            numpy.argpartition(ref_fft, -num_freq_peaks_expected)[
+                -num_freq_peaks_expected:
+            ]
+        )
         # Ensure that the corresponding frequencies of the peaks are close:
-        for cap_freq_index, ref_freq_index in zip(cap_peak_indices,
-                                                  ref_peak_indices):
+        for cap_freq_index, ref_freq_index in zip(cap_peak_indices, ref_peak_indices):
             cap_freq = cap_freq_index / float(len(cap)) * (sampling_rate / 2)
             ref_freq = ref_freq_index / float(len(ref)) * (sampling_rate / 2)
             diff = abs(cap_freq - ref_freq)
@@ -637,6 +666,6 @@ class PyAudioTests(unittest.TestCase):
         # peak when the spectra overlap and mostly 0s elsewhere. Verify that
         # using a histogram of the cross-correlation:
         freq_corr_hist, _ = numpy.histogram(
-            numpy.correlate(cap_fft, ref_fft, mode='full'),
-            bins=10)
-        self.assertLess(sum(freq_corr_hist[2:])/sum(freq_corr_hist), 1e-2)
+            numpy.correlate(cap_fft, ref_fft, mode="full"), bins=10
+        )
+        self.assertLess(sum(freq_corr_hist[2:]) / sum(freq_corr_hist), 1e-2)

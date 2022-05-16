@@ -46,8 +46,9 @@ else:
 try:
     p.get_device_info_by_host_api_device_index(0, -1)
 except IOError as e:
-    assert ((e.args[1] == pyaudio.paInvalidDevice) or \
-            (e.args[1] == pyaudio.paInvalidHostApi))
+    assert (e.args[1] == pyaudio.paInvalidDevice) or (
+        e.args[1] == pyaudio.paInvalidHostApi
+    )
     print("OK: %s" % e.args[0])
 else:
     assert False, "device info by host api device idnex"
@@ -57,8 +58,9 @@ else:
 try:
     p.get_device_info_by_host_api_device_index(-1, 0)
 except IOError as e:
-    assert ((e.args[1] == pyaudio.paInvalidDevice) or \
-            (e.args[1] == pyaudio.paInvalidHostApi))
+    assert (e.args[1] == pyaudio.paInvalidDevice) or (
+        e.args[1] == pyaudio.paInvalidHostApi
+    )
     print("OK: %s" % e.args[0])
 else:
     assert False, "device info by host api device idnex"
@@ -75,11 +77,7 @@ else:
 
 ### now for some real work ###
 
-stream = p.open(channels = 1,
-                rate = 44100,
-                format = pyaudio.paInt16,
-                input = True,
-                start = False)
+stream = p.open(channels=1, rate=44100, format=pyaudio.paInt16, input=True, start=False)
 
 # (note that we didn't start the stream!)
 
@@ -95,7 +93,7 @@ stream.start_stream()
 
 # try to write to the input stream
 try:
-    stream.write('foobar')
+    stream.write("foobar")
 except IOError as e:
     assert e.args[1] == pyaudio.paCanNotWriteToAnInputOnlyStream
     print("OK: %s" % e.args[0])

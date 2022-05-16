@@ -2,9 +2,10 @@
 PyAudio Example: Mac OS X-only: Play a wave file with channel maps.
 """
 
-import pyaudio
-import wave
 import sys
+import wave
+
+import pyaudio
 
 chunk = 1024
 
@@ -14,7 +15,7 @@ if len(sys.argv) < 2:
     print("Plays a wave file.\n\nUsage: %s filename.wav" % sys.argv[0])
     sys.exit(-1)
 
-wf = wave.open(sys.argv[1], 'rb')
+wf = wave.open(sys.argv[1], "rb")
 
 p = PyAudio()
 
@@ -42,11 +43,14 @@ channel_map = (1, -1)
 
 try:
     stream_info = pyaudio.PaMacCoreStreamInfo(
-        flags=pyaudio.PaMacCoreStreamInfo.paMacCorePlayNice, # default
-        channel_map=channel_map)
+        flags=pyaudio.PaMacCoreStreamInfo.paMacCorePlayNice,  # default
+        channel_map=channel_map,
+    )
 except AttributeError:
-    print("Sorry, couldn't find PaMacCoreStreamInfo. Make sure that "
-          "you're running on Mac OS X.")
+    print(
+        "Sorry, couldn't find PaMacCoreStreamInfo. Make sure that "
+        "you're running on Mac OS X."
+    )
     sys.exit(-1)
 
 print("Stream Info Flags:", stream_info.get_flags())
@@ -58,7 +62,8 @@ stream = p.open(
     channels=wf.getnchannels(),
     rate=wf.getframerate(),
     output=True,
-    output_host_api_specific_stream_info=stream_info)
+    output_host_api_specific_stream_info=stream_info,
+)
 
 # read data
 data = wf.readframes(chunk)

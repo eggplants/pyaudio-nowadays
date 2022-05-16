@@ -5,8 +5,9 @@ few samples and play them back immediately).
 This is the half duplex version.
 """
 
-import pyaudio
 import sys
+
+import pyaudio
 
 CHUNK = 1024
 WIDTH = 2
@@ -14,24 +15,28 @@ CHANNELS = 2
 RATE = 44100
 RECORD_SECONDS = 5
 
-if sys.platform == 'darwin':
+if sys.platform == "darwin":
     CHANNELS = 1
 
 p = pyaudio.PyAudio()
 
 # Open input stream using default device:
-stream_input = p.open(format=p.get_format_from_width(WIDTH),
-                      channels=CHANNELS,
-                      rate=RATE,
-                      input=True,
-                      frames_per_buffer=CHUNK)
+stream_input = p.open(
+    format=p.get_format_from_width(WIDTH),
+    channels=CHANNELS,
+    rate=RATE,
+    input=True,
+    frames_per_buffer=CHUNK,
+)
 
 # Open out stream using default device:
-stream_output = p.open(format=p.get_format_from_width(WIDTH),
-                       channels=CHANNELS,
-                       rate=RATE,
-                       output=True,
-                       frames_per_buffer=CHUNK)
+stream_output = p.open(
+    format=p.get_format_from_width(WIDTH),
+    channels=CHANNELS,
+    rate=RATE,
+    output=True,
+    frames_per_buffer=CHUNK,
+)
 
 print("* recording")
 
