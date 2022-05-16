@@ -21,7 +21,7 @@ import wave
 
 import numpy
 
-import pyaudio
+import pyaudio  # type: ignore[import]
 
 DUMP_CAPTURE = False
 
@@ -604,7 +604,7 @@ class PyAudioTests(unittest.TestCase):
         return [
             b"".join(chunk_frames)
             for chunk_frames in tuple(
-                frames[i : i + frames_per_chunk]
+                frames[i : i + frames_per_chunk]  # noqa
                 for i in range(0, len(frames), frames_per_chunk)
             )
         ]

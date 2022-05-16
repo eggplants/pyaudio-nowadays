@@ -12,9 +12,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import os
-import sys
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -173,11 +170,11 @@ htmlhelp_basename = "PyAudiodoc"
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
+    # 'papersize': 'letterpaper',
     # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
+    # 'pointsize': '10pt',
     # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
+    # 'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -244,8 +241,7 @@ texinfo_documents = [
 # texinfo_show_urls = 'footnote'
 
 try:
-    from _portaudio import paMacCoreStreamInfo
+    from _portaudio import paMacCoreStreamInfo  # noqa
+    tags.add("pamac")  # noqa
 except ImportError:
     pass
-else:
-    tags.add("pamac")

@@ -19,7 +19,7 @@ else:
 # get format from invalid width
 try:
     p.get_format_from_width(8)
-except ValueError as e:
+except ValueError:
     print("OK: invalid format from width")
 else:
     assert False, "invalid format"
@@ -75,7 +75,7 @@ except IOError as e:
 else:
     assert False, "bad device index"
 
-### now for some real work ###
+# now for some real work
 
 stream = p.open(channels=1, rate=44100, format=pyaudio.paInt16, input=True, start=False)
 
@@ -103,7 +103,7 @@ else:
 # read some negative data
 try:
     data = stream.read(-1)
-except ValueError as e:
+except ValueError:
     print("OK: Invalid frames")
 else:
     assert False, "invalid frames"
