@@ -1,3 +1,13 @@
+# pyaudio-nowadays
+
+## Original repo
+
+<https://people.csail.mit.edu/hubert/git/pyaudio.git> (development has been stopped since 2017)
+
+
+## Original readme
+
+```text
 ======================================================================
 PyAudio v0.2.11: Python Bindings for PortAudio.
 ======================================================================
@@ -36,3 +46,4 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ======================================================================
+```
